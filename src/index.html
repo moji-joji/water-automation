@@ -5,6 +5,63 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Water Automation</title>
+    <style>
+      * {
+        margin: 0%;
+        padding: 0%;
+        box-sizing: border-box;
+        font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+          "Lucida Sans", Arial, sans-serif;
+      }
+
+      .container {
+        width: 90%;
+        margin: 0 auto;
+      }
+
+      .nav {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+      }
+
+      .nav h1 {
+        text-align: center;
+        color: #1fa1d5;
+      }
+
+      .logo {
+        width: 150px;
+      }
+
+      .bold {
+        font-weight: bold;
+      }
+
+      .water-level {
+        margin-top: 10%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .btn {
+        cursor: pointer;
+        width: fit-content;
+        padding: 0.7em 1em;
+        background-color: #1fa1d5;
+        color: white;
+        font-size: 1em;
+        border: none;
+        box-shadow: 5px 5px black;
+      }
+
+      .btn:active {
+        box-shadow: none;
+        margin: 5px 5px;
+      }
+    </style>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -23,7 +80,7 @@
       <div class="water-level">
         <h2>Water Level Control</h2>
         <h4>Current Level:</h4>
-        
+
         <button class="btn">Fill Water</button>
       </div>
     </div>
