@@ -55,3 +55,21 @@ box-shadow: 5px 5px black ;
     margin: 5px 5px;
 }
 
+
+.tank {
+    width: 150px;
+    height: 300px;
+    border: 2px solid black;
+    background: white;
+    position: relative;
+    
+    display: inline-block;
+    margin: 10px;
+}
+
+.tank .water {
+    position: absolute;
+    background: blue;
+    width: 100%;
+    bottom: 0;
+}

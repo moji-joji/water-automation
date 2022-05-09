@@ -5,8 +5,8 @@
 
 namespace Webpage
 {
-    
-    void displayHTML(WiFiClient client)
+
+    void displayHTML(WiFiClient client, float tankLevel, float temperature)
     {
         //       // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
         // and a content-type so the client knows what's coming, then a blank line:
@@ -50,7 +50,7 @@ namespace Webpage
         client.println(".logo{");
         client.println("width:");
         client.println("150px;");
-            client.println("}");
+        client.println("}");
 
         client.println(".bold{");
         client.println("font-weight: bold;");
@@ -81,9 +81,26 @@ namespace Webpage
         client.println("margin: 5px 5px;");
         client.println("}");
 
-        /////////////////////////////////////////////////////////
+        client.println(".tank {");
+        client.println("width: 150px;");
+        client.println("height: 300px;");
+        client.println("border: 2px solid black;");
+        client.println(" background: white;");
+        client.println("position: relative;");
+
+        client.println("display: inline-block;");
+        client.println(" margin: 10px;");
+        client.println("}");
+
+        client.println(".tank .water {");
+        client.println("position: absolute;");
+        client.println("background: blue;");
+        client.println("width: 100%;");
+        client.println("bottom: 0;");
+        client.println("}");
 
         client.println("</style>");
+        /////////////////////////////////////////////////////////
 
         client.println("</head>");
         // Web Page Heading
@@ -102,7 +119,17 @@ namespace Webpage
         client.println(" </div>");
         client.println(" <div class='water-level'>");
         client.println(" <h2>Water Level Control</h2>");
-        client.println(" <h4>Current Level:</h4>");
+        client.println(" <h4>Current Level: ");
+        client.println(tankLevel * 100);
+        client.println("%</h4>");
+        client.println("</h4> ");
+        client.println("<div class = 'tank'>");
+        client.println("<div class = 'water' style = 'height:");
+        client.print(tankLevel * 100);
+
+        client.print("%;'>");
+        client.println("></ div>");
+        client.println("</ div>");
 
         client.println("<button class='btn'>Fill Water</button>");
         client.println("  </div>");

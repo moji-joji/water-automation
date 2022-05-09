@@ -1,3 +1,4 @@
+const char MAIN_page[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -108,8 +109,28 @@
   </body>
 
   <script>
-    document.getElementById("blue-water").style.height = "20%";
-    console.log("hehe");
-    
+    setInterval(function () {
+      // Call a function repetatively with 2 Second interval
+      getData();
+    }, 1000); //2000mSeconds update rate
+
+    function getData() {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            const responseObj = JSON.parse(this.responseText);
+
+          document.getElementById("water-percentage").textContent =
+            responseObj.waterPercentage;
+document.getElementById("blue-water").style.height = responseObj.waterPercentage  + "%";
+
+          console.log(this.responseText);
+        }
+      };
+      xhttp.open("GET", "readData", true);
+      xhttp.send();
+    }
   </script>
 </html>
+
+)=====";
