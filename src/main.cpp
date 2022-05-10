@@ -5,8 +5,8 @@
 #include "OneWire.h"
 #include "DallasTemperature.h"
 #include "secrets.hpp"
-#include "webpage.hpp"
 #include "waterlevel.hpp"
+#include "watertemperature.hpp"
 #include "index.h" //Web page header file
 
 WebServer server(80);
@@ -30,10 +30,27 @@ void handleData()
     // fill data in the object after reading sensor values
     // calculate distance of sensor from water level, this is the empty height of the tank
     // if we subtract percentage of empty height from 100, we will get percentage filled with water
-    int waterPercentage = 100 - (Waterlevel::getWaterLevel() / 10) * 100;
+    float waterDistance = Waterlevel::getWaterLevel();
+
+    // as the sensor is 2.75cm away from the max water level, we need to subtract 2.75 from the distance
+    waterDistance = waterDistance - 2.75;
+
+    // total height of container is 8cm, so we find percentage according to it
+    int waterPercentage = 100 - ((waterDistance) / 8) * 100;
+
+    // if negative, set to 0
+    waterPercentage = waterPercentage < 0 ? 0 : waterPercentage;
+
+    String waterDistanceString = String(waterDistance);
+    responseObjectString += "\"waterDistance\":" + waterDistanceString + ",";
 
     String waterPercentageStr = String(waterPercentage);
     responseObjectString += "\"waterPercentage\":" + waterPercentageStr;
+
+    // get temperature from sensor
+    float temperature = Watertemperature::getWaterTemperature();
+    String temperatureStr = String(temperature);
+    responseObjectString += ",\"waterTemperature\":" + temperatureStr;
 
     responseObjectString += "}";
     server.send(200, "text/plane", responseObjectString);
@@ -42,6 +59,10 @@ void handleData()
 void setup(void)
 {
     Serial.begin(115200);
+
+    // initialize temperature sensor bus
+    Watertemperature::sensors.begin();
+
     pinMode(Waterlevel::trigPin, OUTPUT); // Sets the trigPin as an Output
     pinMode(Waterlevel::echoPin, INPUT);  // Sets the echoPin as an Input
 

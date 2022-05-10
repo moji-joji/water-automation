@@ -47,6 +47,14 @@ const char MAIN_page[] PROGMEM = R"=====(
         justify-content: space-between;
       }
 
+  .water-level > * {
+        margin-top: 5vh;
+      }
+
+    .water-level > h4{
+        color: red;
+    }  
+
       .btn {
         cursor: pointer;
         width: fit-content;
@@ -80,6 +88,19 @@ const char MAIN_page[] PROGMEM = R"=====(
         width: 100%;
         bottom: 0;
       }
+
+      .temperature-card {
+        width: 100%;
+        margin-top: 10vh;
+      }
+      .temperature-card > h4 {
+        color: red;
+      }
+
+      .temperature-card > * {
+        margin-top: 5vh;
+      }
+
     </style>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -105,14 +126,41 @@ const char MAIN_page[] PROGMEM = R"=====(
 
         <button class="btn">Fill Water</button>
       </div>
+
+    
+      <div class="temperature-card">
+        <h2>Temperature Control</h2>
+        <h4>Current Temperature: <span id="temperature"> </span></h4>
+        20°C
+        <input id="temperature-input" type="range" min="20" max="50" />
+        50°C
+        <h3>Heat upto: <span id="display-temperature-input"></span>°C</h3>
+        <button class="btn">Set Temperature</button>
+      </div>
+
+
     </div>
   </body>
 
   <script>
+
+ document.getElementById("display-temperature-input").innerHTML =
+      document.getElementById("temperature-input").value;
+
+    document
+      .getElementById("temperature-input")
+      .addEventListener("input", function (e) {
+        document.getElementById("display-temperature-input").innerHTML =
+          e.target.value ;
+        console.log("slider moved");
+      });
+
+
+
     setInterval(function () {
-      // Call a function repetatively with 2 Second interval
+      // Call a function repetatively with 1 Second interval
       getData();
-    }, 1000); //2000mSeconds update rate
+    }, 1000); //1000mSeconds update rate
 
     function getData() {
       var xhttp = new XMLHttpRequest();
@@ -121,8 +169,11 @@ const char MAIN_page[] PROGMEM = R"=====(
             const responseObj = JSON.parse(this.responseText);
 
           document.getElementById("water-percentage").textContent =
-            responseObj.waterPercentage;
+            responseObj.waterPercentage+ "%";
 document.getElementById("blue-water").style.height = responseObj.waterPercentage  + "%";
+
+document.getElementById("temperature").textContent = responseObj.waterTemperature + "°C";
+  console.log(responseObj.waterTemperature);
 
           console.log(this.responseText);
         }
