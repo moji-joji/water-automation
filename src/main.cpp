@@ -24,6 +24,7 @@ void handleRoot()
 
 void handleData()
 {
+
     // create object for respose
     String responseObjectString = "{";
 
@@ -56,9 +57,28 @@ void handleData()
     server.send(200, "text/plane", responseObjectString);
     // send response to client
 }
+
+void checkConnection()
+{
+    if (!WiFi.isConnected())
+    {
+        Serial.println("WiFi connection lost, reconnecting...");
+        WiFi.begin(ssid, password);
+
+        // wait for connection
+        while (WiFi.waitForConnectResult() != WL_CONNECTED)
+        {
+            Serial.print(".");
+        }
+    }
+}
+
 void setup(void)
 {
     Serial.begin(115200);
+
+    // ESP 32 onboard LED
+    pinMode(2, OUTPUT);
 
     // initialize temperature sensor bus
     Watertemperature::sensors.begin();
@@ -88,7 +108,7 @@ void setup(void)
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP()); // Print IP address assigned to ESP
 
-    // main oage route
+    // main page route
     server.on("/", handleRoot);
 
     // data recieving route
@@ -102,6 +122,7 @@ void setup(void)
 // loop function
 void loop(void)
 {
+    checkConnection(); // check if wifi is still connected
     server.handleClient();
     delay(1);
 }
