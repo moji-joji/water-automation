@@ -15,6 +15,10 @@ WebServer server(80);
 const char *ssid = Secrets::wifiSSID;
 const char *password = Secrets::wifiPassword;
 
+const int waterLed = 23;
+const int wifiLed = 22;
+const int heatingLed = 21;
+
 // main page route
 void handleRoot()
 {
@@ -62,6 +66,7 @@ void checkConnection()
 {
     if (!WiFi.isConnected())
     {
+        digitalWrite(wifiLed, LOW);
         Serial.println("WiFi connection lost, reconnecting...");
         WiFi.begin(ssid, password);
 
@@ -71,6 +76,11 @@ void checkConnection()
             Serial.print(".");
         }
     }
+    else
+    {
+        Serial.println("WiFi connected");
+        digitalWrite(wifiLed, HIGH);
+    }
 }
 
 void setup(void)
@@ -79,6 +89,15 @@ void setup(void)
 
     // ESP 32 onboard LED
     pinMode(2, OUTPUT);
+
+    // status leds
+    pinMode(waterLed, OUTPUT);
+    pinMode(wifiLed, OUTPUT);
+    pinMode(heatingLed, OUTPUT);
+
+    digitalWrite(waterLed, LOW);
+    digitalWrite(wifiLed, LOW);
+    digitalWrite(heatingLed, LOW);
 
     // initialize temperature sensor bus
     Watertemperature::sensors.begin();

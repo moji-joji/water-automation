@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -46,9 +47,13 @@
         justify-content: space-between;
       }
 
-      .water-level > * {
+  .water-level > * {
         margin-top: 5vh;
       }
+
+    .water-level > h4{
+        color: red;
+    }  
 
       .btn {
         cursor: pointer;
@@ -95,6 +100,7 @@
       .temperature-card > * {
         margin-top: 5vh;
       }
+
     </style>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -121,6 +127,7 @@
         <button class="btn">Fill Water</button>
       </div>
 
+    
       <div class="temperature-card">
         <h2>Temperature Control</h2>
         <h4>Current Temperature: <span id="temperature"> </span></h4>
@@ -130,20 +137,25 @@
         <h3>Heat upto: <span id="display-temperature-input"></span>°C</h3>
         <button class="btn">Set Temperature</button>
       </div>
+
+
     </div>
   </body>
 
   <script>
-    document.getElementById("display-temperature-input").innerHTML =
+
+ document.getElementById("display-temperature-input").innerHTML =
       document.getElementById("temperature-input").value;
 
     document
       .getElementById("temperature-input")
       .addEventListener("input", function (e) {
         document.getElementById("display-temperature-input").innerHTML =
-          e.target.value;
+          e.target.value ;
         console.log("slider moved");
       });
+
+
 
     setInterval(function () {
       // Call a function repetatively with 1 Second interval
@@ -154,12 +166,14 @@
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-          const responseObj = JSON.parse(this.responseText);
+            const responseObj = JSON.parse(this.responseText);
 
           document.getElementById("water-percentage").textContent =
-            responseObj.waterPercentage;
-          document.getElementById("blue-water").style.height =
-            responseObj.waterPercentage + "%";
+            responseObj.waterPercentage+ "%";
+document.getElementById("blue-water").style.height = responseObj.waterPercentage  + "%";
+
+document.getElementById("temperature").textContent = responseObj.waterTemperature + "°C";
+  console.log(responseObj.waterTemperature);
 
           console.log(this.responseText);
         }
@@ -167,5 +181,18 @@
       xhttp.open("GET", "readData", true);
       xhttp.send();
     }
+
+
+    function fillWater(){
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log(this.responseText);
+        }
+      };
+      xhttp.open("GET", "fillWater", true);
+      xhttp.send();
+    }
   </script>
 </html>
+
