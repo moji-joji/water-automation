@@ -62,6 +62,21 @@ void handleData()
     // send response to client
 }
 
+void fillWater()
+{
+
+    String responseObjectString = "{ \"fillWater\": \"yes\"}";
+
+    // fill water
+    Serial.println("Filling water");
+    // turn on water pump
+    digitalWrite(waterLed, HIGH);
+    delay(1000);
+    digitalWrite(waterLed, LOW);
+    Serial.println(server.arg("waterLevel"));
+    server.send(200, "text/plane", responseObjectString);
+}
+
 void checkConnection()
 {
     if (!WiFi.isConnected())
@@ -132,6 +147,9 @@ void setup(void)
 
     // data recieving route
     server.on("/readData", handleData);
+
+    // fill water route
+    server.on("/fillWater", fillWater);
 
     // start server
     server.begin();

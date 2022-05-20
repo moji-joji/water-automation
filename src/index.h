@@ -124,8 +124,8 @@ const char MAIN_page[] PROGMEM = R"=====(
           <div class="water" id="blue-water" style="height: 0%"></div>
         </div>
 
-        <button class="btn">Fill Water</button>
       </div>
+        <button class="btn" onclick="fillWater()">Fill Water</button>
 
     
       <div class="temperature-card">
@@ -180,6 +180,23 @@ document.getElementById("temperature").textContent = responseObj.waterTemperatur
       };
       xhttp.open("GET", "readData", true);
       xhttp.send();
+    }
+
+
+    function fillWater() {
+      console.log("Fill Water button clicked");
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log(this.responseText);
+        }
+      };
+      xhttp.open("POST", "fillWater", true);
+      xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+      xhttp.send('waterLevel=100');
+
+      console.log("Water filled request sent");
     }
   </script>
 </html>

@@ -40,7 +40,7 @@ namespace Waterlevel
         Serial.print(distanceCm);
         Serial.println(" cm");
 
-        delay(1000);
+        // delay(1000);
         return distanceCm;
     }
 }
