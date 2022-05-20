@@ -54,7 +54,8 @@
         color: red;
       }
 
-      .btn {
+      .btn,
+      .btn-red {
         cursor: pointer;
         width: fit-content;
         padding: 0.7em 1em;
@@ -65,9 +66,16 @@
         box-shadow: 5px 5px black;
       }
 
+      .btn-red {
+        background-color: red;
+      }
+      .btn-red:active {
+        box-shadow: none;
+      }
+
       .btn:active {
         box-shadow: none;
-        margin: 5px 5px;
+        /* margin: -5px -5px; */
       }
 
       .tank {
@@ -121,9 +129,9 @@
         <div class="tank">
           <div class="water" id="blue-water" style="height: 0%"></div>
         </div>
-
       </div>
       <button class="btn" onclick="fillWater()">Fill Water</button>
+      <button class="btn-red" onclick="fillWater()">Stop Filling Water</button>
 
       <div class="temperature-card">
         <h2>Temperature Control</h2>
@@ -177,6 +185,8 @@
     }
 
     function fillWater() {
+      let waterPercentage =
+        document.getElementById("water-percentage").textContent;
       console.log("Fill Water button clicked");
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
@@ -184,8 +194,15 @@
           console.log(this.responseText);
         }
       };
-      xhttp.open("GET", "fillWater", true);
-      xhttp.send();
+      xhttp.open("POST", "fillWater", true);
+      xhttp.setRequestHeader(
+        "Content-type",
+        "application/x-www-form-urlencoded"
+      );
+
+      xhttp.send(`waterLevel={$waterPercentage}`);
+
+      console.log("Water filled request sent");
     }
   </script>
 </html>

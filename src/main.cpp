@@ -19,6 +19,9 @@ const int waterLed = 23;
 const int wifiLed = 22;
 const int heatingLed = 21;
 
+u8_t currentWaterPercentage = 5;
+u8_t requiredWaterPercentage = 10;
+
 // main page route
 void handleRoot()
 {
@@ -46,6 +49,8 @@ void handleData()
     // if negative, set to 0
     waterPercentage = waterPercentage < 0 ? 0 : waterPercentage;
 
+    currentWaterPercentage = waterPercentage; // currentWaterPercentage is a global variable
+
     String waterDistanceString = String(waterDistance);
     responseObjectString += "\"waterDistance\":" + waterDistanceString + ",";
 
@@ -62,18 +67,35 @@ void handleData()
     // send response to client
 }
 
+void stopWater()
+{
+    // stop water
+    digitalWrite(waterLed, LOW);
+    server.send(200, "text/plane", "Water stopped");
+}
+
+void startWater()
+{
+    // start water
+    digitalWrite(waterLed, HIGH);
+    server.send(200, "text/plane", "Water started");
+}
+
 void fillWater()
 {
 
-    String responseObjectString = "{ \"fillWater\": \"yes\"}";
+    // update global variable of required water percentage
+    currentWaterPercentage = server.arg("waterLevel").toInt();
+    String responseObjectString = "{ \"requiredWaterPercentage\":" + String(requiredWaterPercentage) + ";" +
+                                  "\"currentWaterPercentage\":" + String(currentWaterPercentage) + "}";
 
     // fill water
-    Serial.println("Filling water");
-    // turn on water pump
-    digitalWrite(waterLed, HIGH);
-    delay(1000);
-    digitalWrite(waterLed, LOW);
-    Serial.println(server.arg("waterLevel"));
+    Serial.println("fillWater()");
+
+    // turn on water pump if button pressed and required waterLevel is higher than current water level
+    requiredWaterPercentage > currentWaterPercentage ? startWater() : stopWater();
+
+    Serial.println();
     server.send(200, "text/plane", responseObjectString);
 }
 
@@ -93,8 +115,16 @@ void checkConnection()
     }
     else
     {
-        Serial.println("WiFi connected");
+
         digitalWrite(wifiLed, HIGH);
+    }
+}
+
+void updateState()
+{
+    if (currentWaterPercentage >= requiredWaterPercentage)
+    {
+        stopWater();
     }
 }
 
@@ -110,7 +140,7 @@ void setup(void)
     pinMode(wifiLed, OUTPUT);
     pinMode(heatingLed, OUTPUT);
 
-    digitalWrite(waterLed, LOW);
+    stopWater();
     digitalWrite(wifiLed, LOW);
     digitalWrite(heatingLed, LOW);
 
@@ -151,6 +181,9 @@ void setup(void)
     // fill water route
     server.on("/fillWater", fillWater);
 
+    // stop water
+    server.on("/stopWater", stopWater);
+
     // start server
     server.begin();
     Serial.println("HTTP server started");
@@ -161,5 +194,6 @@ void loop(void)
 {
     checkConnection(); // check if wifi is still connected
     server.handleClient();
+    updateState(); // check state of water and temperature and update accordingly
     delay(1);
 }

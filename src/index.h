@@ -55,7 +55,8 @@ const char MAIN_page[] PROGMEM = R"=====(
         color: red;
     }  
 
-      .btn {
+      .btn,
+      .btn-red {
         cursor: pointer;
         width: fit-content;
         padding: 0.7em 1em;
@@ -66,9 +67,12 @@ const char MAIN_page[] PROGMEM = R"=====(
         box-shadow: 5px 5px black;
       }
 
-      .btn:active {
+      .btn-red {
+        background-color: red;
+      }
+
+      .btn:active, .btn-red:active {
         box-shadow: none;
-        margin: 5px 5px;
       }
 
       .tank {
@@ -101,6 +105,14 @@ const char MAIN_page[] PROGMEM = R"=====(
         margin-top: 5vh;
       }
 
+        .flex-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 20%;
+      }
+
     </style>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -124,8 +136,10 @@ const char MAIN_page[] PROGMEM = R"=====(
           <div class="water" id="blue-water" style="height: 0%"></div>
         </div>
 
-      </div>
         <button class="btn" onclick="fillWater()">Fill Water</button>
+        <button class="btn-red" onclick="stopWater()">Stop Water</button>
+
+      </div>
 
     
       <div class="temperature-card">
@@ -184,6 +198,8 @@ document.getElementById("temperature").textContent = responseObj.waterTemperatur
 
 
     function fillWater() {
+
+      let waterPercentage = document.getElementById("water-percentage").textContent;
       console.log("Fill Water button clicked");
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
@@ -194,9 +210,26 @@ document.getElementById("temperature").textContent = responseObj.waterTemperatur
       xhttp.open("POST", "fillWater", true);
       xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 
-      xhttp.send('waterLevel=100');
+      xhttp.send(`waterLevel={$waterPercentage}`);
 
       console.log("Water filled request sent");
+    }
+
+
+    function stopWater(){
+      console.log("Stop Water button clicked");
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log(this.responseText);
+        }
+      };
+      xhttp.open("POST", "stopWater", true);
+      xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+      xhttp.send();
+
+      console.log("Water stopped request sent");
     }
   </script>
 </html>
