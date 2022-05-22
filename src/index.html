@@ -89,6 +89,10 @@
         margin: 10px;
       }
 
+      .water-input {
+        height: 500px;
+      }
+
       .tank .water {
         position: absolute;
         background: blue;
@@ -106,6 +110,14 @@
 
       .temperature-card > * {
         margin-top: 5vh;
+      }
+
+      input[type="range"][orient="vertical"] {
+        writing-mode: bt-lr; /* IE */
+        -webkit-appearance: slider-vertical; /* Chromium */
+        width: 8px;
+        height: 175px;
+        padding: 0 5px;
       }
     </style>
     <link rel="stylesheet" href="style.css" />
@@ -126,10 +138,14 @@
       <div class="water-level">
         <h2>Water Level Control</h2>
         <h4>Current Level: <span id="water-percentage"> </span></h4>
-        <div class="tank">
-          <div class="water" id="blue-water" style="height: 0%"></div>
+        <div style="display: flex">
+          <div class="tank">
+            <div class="water" id="blue-water" style="height: 0%"></div>
+          </div>
+          <input class="water-input" type="range" orient="vertical" />
         </div>
       </div>
+
       <button class="btn" onclick="fillWater()">Fill Water</button>
       <button class="btn-red" onclick="fillWater()">Stop Filling Water</button>
 
