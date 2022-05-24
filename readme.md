@@ -34,6 +34,12 @@ Onboard LEDs are present to reflect status.
 
 
 
-## Sequence Diagram
+##System design:
 
-## Flow Chart
+```mermaid
+graph LR
+C[Ultra sonic sensor] --Data--> B[ESP 32]
+D[Temperature sensor] --Data--> B
+A[Webpage] -- Request --> B
+B --Response-->A
+E[User]--Interacts-->A
