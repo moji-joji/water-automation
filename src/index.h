@@ -47,13 +47,13 @@ const char MAIN_page[] PROGMEM = R"=====(
         justify-content: space-between;
       }
 
-  .water-level > * {
+      .water-level > * {
         margin-top: 5vh;
       }
 
-    .water-level > h4{
+      .water-level > h4 {
         color: red;
-    }  
+      }
 
       .btn,
       .btn-red {
@@ -71,7 +71,8 @@ const char MAIN_page[] PROGMEM = R"=====(
         background-color: red;
       }
 
-      .btn:active, .btn-red:active {
+      .btn:active,
+      .btn-red:active {
         box-shadow: none;
       }
 
@@ -106,7 +107,7 @@ const char MAIN_page[] PROGMEM = R"=====(
         margin-top: 5vh;
       }
 
-        .flex-container {
+      .flex-container {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -122,7 +123,7 @@ const char MAIN_page[] PROGMEM = R"=====(
         padding: 0 5px;
         margin-top: 10px;
       }
- #display-water-input {
+      #display-water-input {
         margin: 150px 0 0px 10px;
         color: #1fa1d5;
         font-weight: bold;
@@ -144,7 +145,7 @@ const char MAIN_page[] PROGMEM = R"=====(
           Automation
         </h1>
       </div>
-       <div class="water-level">
+      <div class="water-level">
         <h2>Water Level Control</h2>
         <h4>Current Level: <span id="water-percentage"> </span></h4>
         <div style="display: flex">
@@ -157,7 +158,7 @@ const char MAIN_page[] PROGMEM = R"=====(
         </div>
       </div>
 
-       <button class="btn" onclick="fillWater()">Fill Water</button>
+      <button class="btn" onclick="fillWater()">Fill Water</button>
 
       <button class="btn-red" onclick="stopWater()">Stop Filling Water</button>
 
@@ -168,19 +169,19 @@ const char MAIN_page[] PROGMEM = R"=====(
         <input id="temperature-input" type="range" min="20" max="50" />
         50°C
         <h3>Heat upto: <span id="display-temperature-input"></span>°C</h3>
-        <button class="btn">Set Temperature</button>
+        <button class="btn" onclick="heatWater()">Heat water</button>
+        <button class="btn-red" onclick="stopHeating()">Stop heating</button>
+
       </div>
-
-
     </div>
   </body>
 
   <script>
-
- document.getElementById("display-temperature-input").innerHTML =
+    // get data from site
+    document.getElementById("display-temperature-input").innerHTML =
       document.getElementById("temperature-input").value;
 
-  document
+    document
       .getElementById("water-input")
       .addEventListener("input", function (e) {
         document.getElementById("display-water-input").innerHTML =
@@ -192,12 +193,11 @@ const char MAIN_page[] PROGMEM = R"=====(
       .getElementById("temperature-input")
       .addEventListener("input", function (e) {
         document.getElementById("display-temperature-input").innerHTML =
-          e.target.value ;
+          e.target.value;
         console.log("slider moved");
       });
 
-
-
+    // getData from ESP each interval  1 second
     setInterval(function () {
       // Call a function repetatively with 1 Second interval
       getData();
@@ -207,14 +207,17 @@ const char MAIN_page[] PROGMEM = R"=====(
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            const responseObj = JSON.parse(this.responseText);
+          const responseObj = JSON.parse(this.responseText);
 
+          // render data from response
           document.getElementById("water-percentage").textContent =
-            responseObj.waterPercentage+ "%";
-document.getElementById("blue-water").style.height = responseObj.waterPercentage  + "%";
+            responseObj.waterPercentage + "%";
+          document.getElementById("blue-water").style.height =
+            responseObj.waterPercentage + "%";
 
-document.getElementById("temperature").textContent = responseObj.waterTemperature + "°C";
-  console.log(responseObj.waterTemperature);
+          document.getElementById("temperature").textContent =
+            responseObj.waterTemperature + "°C";
+          console.log(responseObj.waterTemperature);
 
           console.log(this.responseText);
         }
@@ -223,16 +226,15 @@ document.getElementById("temperature").textContent = responseObj.waterTemperatur
       xhttp.send();
     }
 
-
     function fillWater() {
+      // fill water request according to slider value
+      let waterPercentage =
+        document.getElementById("water-percentage").textContent;
 
-      let waterPercentage = document.getElementById("water-percentage").textContent;
-    
-
-        let requiredWaterPercentage = document.getElementById(
+      let requiredWaterPercentage = document.getElementById(
         "display-water-input"
       ).textContent;
-  console.log(requiredWaterPercentage);
+      console.log(requiredWaterPercentage);
 
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
@@ -241,19 +243,23 @@ document.getElementById("temperature").textContent = responseObj.waterTemperatur
         }
       };
       xhttp.open("POST", "fillWater", true);
-      xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhttp.setRequestHeader(
+        "Content-type",
+        "application/x-www-form-urlencoded"
+      );
 
-      //  xhttp.send(`waterLevel={$waterPercentage}&requiredWaterLevel={$requiredWaterPercentage}`);
-       xhttp.send("waterLevel=" +waterPercentage + "&requiredWaterLevel=" +requiredWaterPercentage);
-
-      //  xhttp.send(`waterLevel=12&requiredWaterLevel=50`);
-
+      xhttp.send(
+        "waterLevel=" +
+          waterPercentage +
+          "&requiredWaterLevel=" +
+          requiredWaterPercentage
+      );
 
       console.log("Water filled request sent");
     }
 
-
-    function stopWater(){
+    function stopWater() {
+      // emergency stop request
       console.log("Stop Water button clicked");
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
@@ -262,11 +268,72 @@ document.getElementById("temperature").textContent = responseObj.waterTemperatur
         }
       };
       xhttp.open("POST", "stopWater", true);
-      xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhttp.setRequestHeader(
+        "Content-type",
+        "application/x-www-form-urlencoded"
+      );
 
       xhttp.send();
 
       console.log("Water stopped request sent");
+    }
+
+    function heatWater() {
+      // current water level
+      let temperature = document.getElementById("temperature").textContent;
+
+      // the required temperature of water to be heated
+      let requiredTemperature = document.getElementById(
+        "display-temperature-input"
+      ).textContent;
+      console.log(requiredTemperature);
+
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log(this.responseText);
+        }
+      };
+      xhttp.open("POST", "heatWater", true);
+      xhttp.setRequestHeader(
+        "Content-type",
+        "application/x-www-form-urlencoded"
+      );
+
+      // xhttp.send(
+      //   "temperature=" +
+      //     temperature +
+      //     "&requiredTemperature=" +
+      //     requiredTemperature
+      // );
+   
+      xhttp.send(
+        "temperature=" +
+          25.23 +
+          "&requiredTemperature=" +
+          35.32
+      );
+   
+    }
+
+    function stopHeating(){
+      // emergency stop request
+      console.log("Stop heating button clicked");
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log(this.responseText);
+        }
+      };
+      xhttp.open("POST", "stopHeating", true);
+      xhttp.setRequestHeader(
+        "Content-type",
+        "application/x-www-form-urlencoded"
+      );
+
+      xhttp.send();
+
+      console.log("Heating stopped request sent");
     }
   </script>
 </html>

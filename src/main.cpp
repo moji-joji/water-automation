@@ -19,8 +19,10 @@ const int waterLed = 23;
 const int wifiLed = 22;
 const int heatingLed = 21;
 
-u8_t currentWaterPercentage = 5;
-u8_t requiredWaterPercentage = 10;
+u8_t currentWaterPercentage = 0;
+u8_t requiredWaterPercentage = 0;
+float currentWaterTemperature = 0;
+float requiredWaterTemperature = 0;
 
 // main page route
 void handleRoot()
@@ -82,6 +84,20 @@ void startWater()
     server.send(200, "text/plane", "Water started");
 }
 
+void startHeating()
+{
+    // start heating
+    digitalWrite(heatingLed, HIGH);
+    server.send(200, "text/plane", "Heating started");
+}
+
+void stopHeating()
+{
+    // stop heating
+    digitalWrite(heatingLed, LOW);
+    server.send(200, "text/plane", "Heating stopped");
+}
+
 void fillWater()
 {
 
@@ -101,6 +117,29 @@ void fillWater()
 
     // turn on water pump if button pressed and required waterLevel is higher than current water level
     requiredWaterPercentage > currentWaterPercentage ? startWater() : stopWater();
+
+    Serial.println();
+    server.send(200, "text/plane", responseObjectString);
+}
+
+void heatWater()
+{
+    // update global variable of required water temperature
+    currentWaterTemperature = server.arg("waterTemperature").toFloat();
+    requiredWaterTemperature = server.arg("requiredWaterTemperature").toFloat();
+
+    String responseObjectString = "{ \"requiredWaterTemperature\":" + String(requiredWaterTemperature) + ";" +
+                                  "\"currentWaterTemperature\":" + String(currentWaterTemperature) + "}";
+
+    // heat water
+    Serial.println("heatWater()");
+    Serial.println(currentWaterTemperature);
+    Serial.println(requiredWaterTemperature);
+
+    Serial.println("heatWater()");
+
+    // turn on water pump if button pressed and required waterLevel is higher than current water level
+    requiredWaterTemperature > currentWaterTemperature ? startHeating() : stopHeating();
 
     Serial.println();
     server.send(200, "text/plane", responseObjectString);
@@ -132,6 +171,10 @@ void updateState()
     if (currentWaterPercentage >= requiredWaterPercentage)
     {
         stopWater();
+    }
+    if (currentWaterTemperature >= requiredWaterTemperature)
+    {
+        stopHeating();
     }
 }
 
@@ -190,6 +233,12 @@ void setup(void)
 
     // stop water
     server.on("/stopWater", stopWater);
+
+    // start heating
+    server.on("/heatWater", heatWater);
+
+    // stop heating
+    server.on("/stopHeating", stopHeating);
 
     // start server
     server.begin();
