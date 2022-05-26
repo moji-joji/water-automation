@@ -46,8 +46,9 @@ void handleData()
     // total height of container is 8cm, so we find percentage according to it
     int waterPercentage = 100 - ((waterDistance) / 8) * 100;
 
-    // if negative, set to 0
+    // if negative, set to 0, if more than 100 set to 100
     waterPercentage = waterPercentage < 0 ? 0 : waterPercentage;
+    waterPercentage = waterPercentage > 100 ? 100 : waterPercentage;
 
     currentWaterPercentage = waterPercentage; // currentWaterPercentage is a global variable
 
@@ -86,10 +87,16 @@ void fillWater()
 
     // update global variable of required water percentage
     currentWaterPercentage = server.arg("waterLevel").toInt();
+    requiredWaterPercentage = server.arg("requiredWaterLevel").toInt();
+
     String responseObjectString = "{ \"requiredWaterPercentage\":" + String(requiredWaterPercentage) + ";" +
                                   "\"currentWaterPercentage\":" + String(currentWaterPercentage) + "}";
 
     // fill water
+    Serial.println("fillWater()");
+    Serial.println(currentWaterPercentage);
+    Serial.println(requiredWaterPercentage);
+
     Serial.println("fillWater()");
 
     // turn on water pump if button pressed and required waterLevel is higher than current water level

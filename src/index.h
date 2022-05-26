@@ -91,6 +91,7 @@ const char MAIN_page[] PROGMEM = R"=====(
         background: blue;
         width: 100%;
         bottom: 0;
+        border-radius: 10px;
       }
 
       .temperature-card {
@@ -113,6 +114,20 @@ const char MAIN_page[] PROGMEM = R"=====(
         width: 20%;
       }
 
+      input[type="range"][orient="vertical"] {
+        writing-mode: bt-lr; /* IE */
+        -webkit-appearance: slider-vertical; /* Chromium */
+        width: 8px;
+        height: 300px;
+        padding: 0 5px;
+        margin-top: 10px;
+      }
+ #display-water-input {
+        margin: 150px 0 0px 10px;
+        color: #1fa1d5;
+        font-weight: bold;
+        font-size: 16px;
+      }
     </style>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -129,19 +144,23 @@ const char MAIN_page[] PROGMEM = R"=====(
           Automation
         </h1>
       </div>
-      <div class="water-level">
+       <div class="water-level">
         <h2>Water Level Control</h2>
         <h4>Current Level: <span id="water-percentage"> </span></h4>
-        <div class="tank">
-          <div class="water" id="blue-water" style="height: 0%"></div>
+        <div style="display: flex">
+          <div class="tank">
+            <div class="water" id="blue-water" style="height: 0%"></div>
+          </div>
+          <input id="water-input" type="range" orient="vertical" />
+          <span id="display-water-input">50</span
+          ><span id="display-water-input">%</span>
         </div>
-
-        <button class="btn" onclick="fillWater()">Fill Water</button>
-        <button class="btn-red" onclick="stopWater()">Stop Water</button>
-
       </div>
 
-    
+       <button class="btn" onclick="fillWater()">Fill Water</button>
+
+      <button class="btn-red" onclick="stopWater()">Stop Filling Water</button>
+
       <div class="temperature-card">
         <h2>Temperature Control</h2>
         <h4>Current Temperature: <span id="temperature"> </span></h4>
@@ -160,6 +179,14 @@ const char MAIN_page[] PROGMEM = R"=====(
 
  document.getElementById("display-temperature-input").innerHTML =
       document.getElementById("temperature-input").value;
+
+  document
+      .getElementById("water-input")
+      .addEventListener("input", function (e) {
+        document.getElementById("display-water-input").innerHTML =
+          e.target.value;
+        console.log("slider moved");
+      });
 
     document
       .getElementById("temperature-input")
@@ -200,7 +227,13 @@ document.getElementById("temperature").textContent = responseObj.waterTemperatur
     function fillWater() {
 
       let waterPercentage = document.getElementById("water-percentage").textContent;
-      console.log("Fill Water button clicked");
+    
+
+        let requiredWaterPercentage = document.getElementById(
+        "display-water-input"
+      ).textContent;
+  console.log(requiredWaterPercentage);
+
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
@@ -210,7 +243,11 @@ document.getElementById("temperature").textContent = responseObj.waterTemperatur
       xhttp.open("POST", "fillWater", true);
       xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 
-      xhttp.send(`waterLevel={$waterPercentage}`);
+      //  xhttp.send(`waterLevel={$waterPercentage}&requiredWaterLevel={$requiredWaterPercentage}`);
+       xhttp.send("waterLevel=" +waterPercentage + "&requiredWaterLevel=" +requiredWaterPercentage);
+
+      //  xhttp.send(`waterLevel=12&requiredWaterLevel=50`);
+
 
       console.log("Water filled request sent");
     }
