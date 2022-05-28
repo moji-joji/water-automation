@@ -4,3 +4,5 @@
 .vscode/launch.json
 .vscode/ipch
 src/secrets.hpp
+main1.cpp
+index1.html

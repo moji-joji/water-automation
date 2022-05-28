@@ -62,6 +62,7 @@ void handleData()
 
     // get temperature from sensor
     float temperature = Watertemperature::getWaterTemperature();
+    currentWaterTemperature = temperature;
     String temperatureStr = String(temperature);
     responseObjectString += ",\"waterTemperature\":" + temperatureStr;
 
@@ -122,9 +123,22 @@ void fillWater()
     server.send(200, "text/plane", responseObjectString);
 }
 
+// serial print variable type
+void types(String a) { Serial.println("it's a String"); }
+void types(int a) { Serial.println("it's an int"); }
+void types(char *a) { Serial.println("it's a char*"); }
+void types(float a) { Serial.println("it's a float"); }
+void types(bool a) { Serial.println("it's a bool"); }
+
 void heatWater()
 {
     // update global variable of required water temperature
+    types(server.arg("requiredWaterTemperature"));
+    types(server.arg("waterTemperature"));
+
+        Serial.println(server.arg("waterTemperature"));
+    Serial.println(server.arg("requiredWaterTemperature"));
+
     currentWaterTemperature = server.arg("waterTemperature").toFloat();
     requiredWaterTemperature = server.arg("requiredWaterTemperature").toFloat();
 

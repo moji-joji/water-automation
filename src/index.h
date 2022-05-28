@@ -174,6 +174,7 @@ const char MAIN_page[] PROGMEM = R"=====(
 
       </div>
     </div>
+
   </body>
 
   <script>
@@ -300,19 +301,14 @@ const char MAIN_page[] PROGMEM = R"=====(
         "application/x-www-form-urlencoded"
       );
 
-      // xhttp.send(
-      //   "temperature=" +
-      //     temperature +
-      //     "&requiredTemperature=" +
-      //     requiredTemperature
-      // );
-   
       xhttp.send(
-        "temperature=" +
-          25.23 +
-          "&requiredTemperature=" +
-          35.32
+        "waterTemperature=" +
+          temperature +
+          "&requiredWaterTemperature=" +
+          requiredTemperature
       );
+   
+   
    
     }
 
