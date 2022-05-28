@@ -5,6 +5,7 @@ const char MAIN_page[] PROGMEM = R"=====(
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://code.highcharts.com/highcharts.js"></script>
     <title>Water Automation</title>
     <style>
       * {
@@ -98,6 +99,8 @@ const char MAIN_page[] PROGMEM = R"=====(
       .temperature-card {
         width: 100%;
         margin-top: 10vh;
+        margin-bottom: 10vh;
+
       }
       .temperature-card > h4 {
         color: red;
@@ -105,6 +108,7 @@ const char MAIN_page[] PROGMEM = R"=====(
 
       .temperature-card > * {
         margin-top: 5vh;
+
       }
 
       .flex-container {
@@ -129,6 +133,21 @@ const char MAIN_page[] PROGMEM = R"=====(
         font-weight: bold;
         font-size: 16px;
       }
+
+      
+      .chart-water{
+        width: 100%;
+
+        margin-bottom: 10vh;
+
+      
+      }
+
+      .chart-temperature{
+        width: 100%;
+      
+      }
+
     </style>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -173,11 +192,72 @@ const char MAIN_page[] PROGMEM = R"=====(
         <button class="btn-red" onclick="stopHeating()">Stop heating</button>
 
       </div>
+    
+  <div id="chart-water" class="container" ></div>
+
+  <div id="chart-temperature" class="container" ></div>
+    
     </div>
+
 
   </body>
 
   <script>
+
+// Chart rendering
+var chartW = new Highcharts.Chart({
+  chart:{ renderTo : 'chart-water' },
+  title: { text: 'Water Level' },
+  series: [{
+    showInLegend: false,
+    data: []
+  }],
+  plotOptions: {
+    line: { animation: false,
+      dataLabels: { enabled: true }
+    },
+    series: { color: '#059e8a' }
+  },
+  xAxis: { type: 'datetime',
+    dateTimeLabelFormats: { second: '%H:%M:%S' }
+  },
+  yAxis: {
+    title: { text: '%' }
+    //title: { text: 'Temperature (Fahrenheit)' }
+  },
+  credits: { enabled: false }
+});
+
+
+
+// Chart rendering
+var chartT = new Highcharts.Chart({
+  chart:{ renderTo : 'chart-temperature' },
+  title: { text: 'Water Temperature' },
+  series: [{
+    showInLegend: false,
+    data: []
+  }],
+  plotOptions: {
+    line: { animation: false,
+      dataLabels: { enabled: true }
+    },
+    series: { color: '#059e8a' }
+  },
+  xAxis: { type: 'datetime',
+    dateTimeLabelFormats: { second: '%H:%M:%S' }
+  },
+  yAxis: {
+    title: { text: 'Temperature (Celsius)' }
+    //title: { text: 'Temperature (Fahrenheit)' }
+  },
+  credits: { enabled: false }
+});
+
+
+
+
+
     // get data from site
     document.getElementById("display-temperature-input").innerHTML =
       document.getElementById("temperature-input").value;
@@ -218,6 +298,10 @@ const char MAIN_page[] PROGMEM = R"=====(
 
           document.getElementById("temperature").textContent =
             responseObj.waterTemperature + "°C";
+
+
+
+ 
           console.log(responseObj.waterTemperature);
 
           console.log(this.responseText);
@@ -226,6 +310,37 @@ const char MAIN_page[] PROGMEM = R"=====(
       xhttp.open("GET", "readData", true);
       xhttp.send();
     }
+
+// plot water level data
+setInterval(() => {
+    var x = (new Date()).getTime(),
+          y = parseInt( document.getElementById("water-percentage").textContent);
+      //console.log(this.responseText);
+      if(chartW.series[0].data.length > 40) {
+        chartW.series[0].addPoint([x, y], true, true, true);
+      } else {
+        chartW.series[0].addPoint([x, y], true, false, true);
+      }
+
+}, 1000);
+
+
+
+// plot temperature data
+setInterval(() => {
+    var x = (new Date()).getTime(),
+          y = parseFloat(document.getElementById("temperature").textContent);
+      //console.log(this.responseText);
+      if(chartT.series[0].data.length > 40) {
+        chartT.series[0].addPoint([x, y], true, true, true);
+      } else {
+        chartT.series[0].addPoint([x, y], true, false, true);
+      }
+
+}, 1000);
+
+
+
 
     function fillWater() {
       // fill water request according to slider value
