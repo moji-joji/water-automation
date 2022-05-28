@@ -11,11 +11,11 @@ The system is controlled using the webpage which is served by the ESP 32 webserv
 
 ## Parts Used
 Total Cost =  PKR 1700
- - ESP 32 
+- ESP 32 
 - SR-04 Ultrasonic sensor 
 - DS18B20 Temperature sensor  
 - Bread board
--  Leds
+- Leds
 - Resistors
 - Water Container
 - USB data cable

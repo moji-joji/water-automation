@@ -183,6 +183,25 @@ const char MAIN_page[] PROGMEM = R"=====(
 
       <button class="btn-red" onclick="stopWater()">Stop Filling Water</button>
 
+      <div class="schedule-filling" style="margin: 40px 0px 40px 0px">
+        <input
+          type="datetime-local"
+          name="scheduled-time"
+          id="scheduled-time"
+        />
+        <button class="btn" onclick="scheduleFilling()">
+          Schedule Filling
+        </button>
+
+        <h3>
+          Schedule:
+          <table class="schedule-table"></table>
+          <button class="btn-red" onclick="deleteFromWaterSchedule()">
+            Delete last added
+          </button>
+        </h3>
+      </div>
+
       <div class="temperature-card">
         <h2>Temperature Control</h2>
         <h4>Current Temperature: <span id="temperature"> </span></h4>
@@ -210,7 +229,7 @@ const char MAIN_page[] PROGMEM = R"=====(
     var requiredWaterPercentage = 50;
     var requiredWaterTemperature = 35;
     var prevWaterTemperature = 0;
-    var prevTempEta  = 0;
+    var prevTempEta = 0;
 
     // Chart rendering
     var chartW = new Highcharts.Chart({
@@ -303,9 +322,7 @@ const char MAIN_page[] PROGMEM = R"=====(
 
           console.log(this.responseText);
 
-       
-       
-         // calculate estimated time to fill water
+          // calculate estimated time to fill water
 
           // current Water percentage
           let waterPercentage = parseInt(responseObj.waterPercentage);
@@ -334,75 +351,59 @@ const char MAIN_page[] PROGMEM = R"=====(
             document.getElementById("eta-level").style.display = "none";
           }
 
-
-
           // calculate estimated time to heat water
 
- 
-         // calculate estimated time to fill water
+          // calculate estimated time to fill water
 
           // current Water temperature
           let waterTemperature = parseFloat(responseObj.waterTemperature);
 
           // read the required water percentage
           requiredWaterTemperature = parseFloat(requiredWaterTemperature);
-          
+
           console.log(waterTemperature);
           console.log(requiredWaterTemperature);
           console.log(prevWaterTemperature);
 
-
-
           // calculate the difference between the current temp  and the previous temp, one second ago
-          let waterHeatRate = waterTemperature - prevWaterTemperature ;
+          let waterHeatRate = waterTemperature - prevWaterTemperature;
 
           // number of seconds required to heat the water
           let waterHeatEta =
-            (requiredWaterTemperature  -  waterTemperature) / waterHeatRate;
+            (requiredWaterTemperature - waterTemperature) / waterHeatRate;
 
           waterHeatEta = waterHeatEta.toFixed(0);
 
           console.log(waterHeatEta);
 
-          
           // update water Temperature
           prevWaterTemperature = waterTemperature;
-        
+
           if (
             waterHeatEta > 0 &&
-           waterHeatEta != Infinity &&
+            waterHeatEta != Infinity &&
             parseInt(responseObj.waterIsHeating) == 1
           ) {
-          document.getElementById("waterheat-eta").innerHTML = waterHeatEta;
+            document.getElementById("waterheat-eta").innerHTML = waterHeatEta;
 
             document.getElementById("eta-temperature").style.display = "block";
-          } 
+          }
 
           // if infinity or 0 we just show previous value however in real life we should show actual value
-          else if(
-             (waterHeatEta < 0 ||
-           waterHeatEta == Infinity) &&
+          else if (
+            (waterHeatEta < 0 || waterHeatEta == Infinity) &&
             parseInt(responseObj.waterIsHeating) == 1
-          ){
-          document.getElementById("waterheat-eta").innerHTML = prevTempEta;;
+          ) {
+            document.getElemen;
+            asdtById("waterheat-eta").innerHTML = prevTempEta;
             document.getElementById("eta-temperature").style.display = "block";
-
-          }
-          
-          else {
+          } else {
             document.getElementById("eta-temperature").style.display = "none";
           }
 
-  if(waterHeatEta > 0 && waterHeatEta != Infinity){
-
-      prevTempEta  = waterHeatEta;;
-}
-
-
-
-
-
-
+          if (waterHeatEta > 0 && waterHeatEta != Infinity) {
+            prevTempEta = waterHeatEta;
+          }
         }
       };
       xhttp.open("GET", "readData", true);
@@ -496,7 +497,7 @@ const char MAIN_page[] PROGMEM = R"=====(
       console.log(requiredTemperature);
 
       // update global variable for tracking rate
- requiredWaterTemperature = requiredTemperature;
+      requiredWaterTemperature = requiredTemperature;
 
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
@@ -537,6 +538,87 @@ const char MAIN_page[] PROGMEM = R"=====(
 
       console.log("Heating stopped request sent");
     }
+
+    // global array
+    var scheduleJson = [];
+    var timeoutArr = [];
+
+    function printWaterFillingSchedule() {
+      for (let i = 0; i < scheduleJson.length; i++) {
+        document.getElementsByClassName("schedule-table")[0].innerHTML +=
+          "<tr><td>" +
+          scheduleJson[i].time +
+          "</td><td>" +
+          scheduleJson[i].waterLevel +
+          "</td></tr>";
+      }
+    }
+
+    // schedule filling water
+    function scheduleFilling() {
+      // get the time from the input
+      let time = document.getElementById("scheduled-time").value;
+      console.log(time);
+
+      // get the water level from the input
+      let requiredWaterPercentage =
+        document.getElementById("water-input").value;
+
+      let waterLevel = document.getElementById("water-percentage").textContent;
+
+      timeoutArr.push(
+        setTimeout(() => {
+          console.log("Scheduled filling request sent");
+          // send request to fill water
+          var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              console.log(this.responseText);
+            }
+          };
+          xhttp.open("POST", "fillWater", true);
+          xhttp.setRequestHeader(
+            "Content-type",
+            "application/x-www-form-urlencoded"
+          );
+
+          xhttp.send(
+            "waterLevel=" +
+              waterLevel +
+              "&requiredWaterLevel=" +
+              requiredWaterPercentage
+          );
+
+          console.log(new Date());
+
+          scheduleJson.shift();
+          timeoutArr.shift();
+        }, new Date(time).getTime() - new Date().getTime())
+      );
+
+      // add the request to the schedule
+      scheduleJson.push({
+        time: time,
+        waterLevel: requiredWaterPercentage,
+      });
+      document.getElementsByClassName("schedule-table")[0].innerHTML = "";
+
+      printWaterFillingSchedule();
+    }
+
+    function deleteFromWaterSchedule() {
+      scheduleJson.pop();
+      clearTimeout(timeoutArr.pop());
+    }
+    setInterval(() => {
+      // print schedule
+      document.getElementsByClassName("schedule-table")[0].innerHTML = "";
+      printWaterFillingSchedule();
+
+      console.log(scheduleJson);
+
+      console.log(timeoutArr);
+    }, 1000);
   </script>
 </html>
 
