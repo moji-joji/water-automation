@@ -23,6 +23,8 @@ u8_t currentWaterPercentage = 0;
 u8_t requiredWaterPercentage = 0;
 float currentWaterTemperature = 0;
 float requiredWaterTemperature = 0;
+u8_t waterIsHeating = 0;
+u8_t waterIsFilling = 0;
 
 // main page route
 void handleRoot()
@@ -66,6 +68,12 @@ void handleData()
     String temperatureStr = String(temperature);
     responseObjectString += ",\"waterTemperature\":" + temperatureStr;
 
+    String waterIsFillingStr = String(waterIsFilling);
+    responseObjectString += ",\"waterIsFilling\":" + waterIsFillingStr;
+
+    String waterIsHeatingStr = String(waterIsHeating);
+    responseObjectString += ",\"waterIsHeating\":" + waterIsHeatingStr;
+
     responseObjectString += "}";
     server.send(200, "text/plane", responseObjectString);
     // send response to client
@@ -75,6 +83,8 @@ void stopWater()
 {
     // stop water
     digitalWrite(waterLed, LOW);
+    waterIsFilling = 0;
+
     server.send(200, "text/plane", "Water stopped");
 }
 
@@ -82,6 +92,8 @@ void startWater()
 {
     // start water
     digitalWrite(waterLed, HIGH);
+    waterIsFilling = 1;
+
     server.send(200, "text/plane", "Water started");
 }
 
@@ -89,6 +101,7 @@ void startHeating()
 {
     // start heating
     digitalWrite(heatingLed, HIGH);
+    waterIsHeating = 1;
     server.send(200, "text/plane", "Heating started");
 }
 
@@ -96,6 +109,7 @@ void stopHeating()
 {
     // stop heating
     digitalWrite(heatingLed, LOW);
+    waterIsHeating = 0;
     server.send(200, "text/plane", "Heating stopped");
 }
 
@@ -136,7 +150,7 @@ void heatWater()
     types(server.arg("requiredWaterTemperature"));
     types(server.arg("waterTemperature"));
 
-        Serial.println(server.arg("waterTemperature"));
+    Serial.println(server.arg("waterTemperature"));
     Serial.println(server.arg("requiredWaterTemperature"));
 
     currentWaterTemperature = server.arg("waterTemperature").toFloat();

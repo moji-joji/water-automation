@@ -100,7 +100,6 @@ const char MAIN_page[] PROGMEM = R"=====(
         width: 100%;
         margin-top: 10vh;
         margin-bottom: 10vh;
-
       }
       .temperature-card > h4 {
         color: red;
@@ -108,7 +107,6 @@ const char MAIN_page[] PROGMEM = R"=====(
 
       .temperature-card > * {
         margin-top: 5vh;
-
       }
 
       .flex-container {
@@ -134,20 +132,21 @@ const char MAIN_page[] PROGMEM = R"=====(
         font-size: 16px;
       }
 
-      
-      .chart-water{
+      .chart-water {
         width: 100%;
 
         margin-bottom: 10vh;
-
-      
       }
 
-      .chart-temperature{
+      .chart-temperature {
         width: 100%;
-      
       }
 
+      .chart-water {
+        width: 100%;
+        margin-top: 10vh;
+        margin-bottom: 10vh;
+      }
     </style>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -167,6 +166,9 @@ const char MAIN_page[] PROGMEM = R"=====(
       <div class="water-level">
         <h2>Water Level Control</h2>
         <h4>Current Level: <span id="water-percentage"> </span></h4>
+        <h4 id="eta-level">
+          Estimated time to fill: <span id="waterfill-eta"></span>seconds
+        </h4>
         <div style="display: flex">
           <div class="tank">
             <div class="water" id="blue-water" style="height: 0%"></div>
@@ -190,73 +192,64 @@ const char MAIN_page[] PROGMEM = R"=====(
         <h3>Heat upto: <span id="display-temperature-input"></span>°C</h3>
         <button class="btn" onclick="heatWater()">Heat water</button>
         <button class="btn-red" onclick="stopHeating()">Stop heating</button>
-
       </div>
-    
-  <div id="chart-water" class="container" ></div>
 
-  <div id="chart-temperature" class="container" ></div>
-    
+      <div id="chart-water" class="container"></div>
+
+      <div id="chart-temperature" class="container"></div>
     </div>
-
-
   </body>
 
   <script>
-
-// Chart rendering
-var chartW = new Highcharts.Chart({
-  chart:{ renderTo : 'chart-water' },
-  title: { text: 'Water Level' },
-  series: [{
-    showInLegend: false,
-    data: []
-  }],
-  plotOptions: {
-    line: { animation: false,
-      dataLabels: { enabled: true }
-    },
-    series: { color: '#059e8a' }
-  },
-  xAxis: { type: 'datetime',
-    dateTimeLabelFormats: { second: '%H:%M:%S' }
-  },
-  yAxis: {
-    title: { text: '%' }
-    //title: { text: 'Temperature (Fahrenheit)' }
-  },
-  credits: { enabled: false }
-});
+    var prevWaterLevel = 0;
+    var beingFilled = 0;
+    var beingHeated = 0;
+    var   requiredWaterPercentage = 50;
 
 
+    // Chart rendering
+    var chartW = new Highcharts.Chart({
+      chart: { renderTo: "chart-water" },
+      title: { text: "Water Level" },
+      series: [
+        {
+          showInLegend: false,
+          data: [],
+        },
+      ],
+      plotOptions: {
+        line: { animation: false, dataLabels: { enabled: true } },
+        series: { color: "#059e8a" },
+      },
+      xAxis: { type: "datetime", dateTimeLabelFormats: { second: "%H:%M:%S" } },
+      yAxis: {
+        title: { text: "%" },
+        //title: { text: 'Temperature (Fahrenheit)' }
+      },
+      credits: { enabled: false },
+    });
 
-// Chart rendering
-var chartT = new Highcharts.Chart({
-  chart:{ renderTo : 'chart-temperature' },
-  title: { text: 'Water Temperature' },
-  series: [{
-    showInLegend: false,
-    data: []
-  }],
-  plotOptions: {
-    line: { animation: false,
-      dataLabels: { enabled: true }
-    },
-    series: { color: '#059e8a' }
-  },
-  xAxis: { type: 'datetime',
-    dateTimeLabelFormats: { second: '%H:%M:%S' }
-  },
-  yAxis: {
-    title: { text: 'Temperature (Celsius)' }
-    //title: { text: 'Temperature (Fahrenheit)' }
-  },
-  credits: { enabled: false }
-});
-
-
-
-
+    // Chart rendering
+    var chartT = new Highcharts.Chart({
+      chart: { renderTo: "chart-temperature" },
+      title: { text: "Water Temperature" },
+      series: [
+        {
+          showInLegend: false,
+          data: [],
+        },
+      ],
+      plotOptions: {
+        line: { animation: false, dataLabels: { enabled: true } },
+        series: { color: "#059e8a" },
+      },
+      xAxis: { type: "datetime", dateTimeLabelFormats: { second: "%H:%M:%S" } },
+      yAxis: {
+        title: { text: "Temperature (Celsius)" },
+        //title: { text: 'Temperature (Fahrenheit)' }
+      },
+      credits: { enabled: false },
+    });
 
     // get data from site
     document.getElementById("display-temperature-input").innerHTML =
@@ -285,6 +278,7 @@ var chartT = new Highcharts.Chart({
     }, 1000); //1000mSeconds update rate
 
     function getData() {
+     
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
@@ -299,55 +293,82 @@ var chartT = new Highcharts.Chart({
           document.getElementById("temperature").textContent =
             responseObj.waterTemperature + "°C";
 
-
-
- 
           console.log(responseObj.waterTemperature);
 
           console.log(this.responseText);
+
+
+
+
+           // calculate estimated time to fill water
+           
+           // current Water percentage
+      let waterPercentage =
+       parseInt(responseObj.waterPercentage);
+
+
+    // read the required water percentage
+   requiredWaterPercentage = 
+ parseInt( requiredWaterPercentage);
+    // calculate the difference between the current water percentage and the previous water percentage one second ago
+      let waterFillRate = waterPercentage - prevWaterLevel;
+
+      // number of seconds required to fill the water
+      let waterFillEta =
+        (requiredWaterPercentage - waterPercentage) / waterFillRate;
+
+
+      waterFillEta = waterFillEta.toFixed(0);
+
+      document.getElementById("waterfill-eta").innerHTML = waterFillEta;
+      prevWaterLevel = waterPercentage;
+
+      if (waterFillEta > 0 &&  waterFillEta != Infinity &&  parseInt(responseObj.waterIsFilling) == 1 ) {
+        document.getElementById("eta-level").style.display = "block";
+      } else {
+        document.getElementById("eta-level").style.display = "none";
+      }
+
+
+
+
+
         }
       };
       xhttp.open("GET", "readData", true);
       xhttp.send();
     }
 
-// plot water level data
-setInterval(() => {
-    var x = (new Date()).getTime(),
-          y = parseInt( document.getElementById("water-percentage").textContent);
+    // plot water level data
+    setInterval(() => {
+      var x = new Date().getTime(),
+        y = parseInt(document.getElementById("water-percentage").textContent);
       //console.log(this.responseText);
-      if(chartW.series[0].data.length > 40) {
+      if (chartW.series[0].data.length > 40) {
         chartW.series[0].addPoint([x, y], true, true, true);
       } else {
         chartW.series[0].addPoint([x, y], true, false, true);
       }
+    }, 1000);
 
-}, 1000);
-
-
-
-// plot temperature data
-setInterval(() => {
-    var x = (new Date()).getTime(),
-          y = parseFloat(document.getElementById("temperature").textContent);
+    // plot temperature data
+    setInterval(() => {
+      var x = new Date().getTime(),
+        y = parseFloat(document.getElementById("temperature").textContent);
       //console.log(this.responseText);
-      if(chartT.series[0].data.length > 40) {
+      if (chartT.series[0].data.length > 40) {
         chartT.series[0].addPoint([x, y], true, true, true);
       } else {
         chartT.series[0].addPoint([x, y], true, false, true);
       }
-
-}, 1000);
-
-
-
+    }, 1000);
 
     function fillWater() {
       // fill water request according to slider value
       let waterPercentage =
         document.getElementById("water-percentage").textContent;
 
-      let requiredWaterPercentage = document.getElementById(
+     requiredWaterPercentage = document.getElementById(
         "display-water-input"
       ).textContent;
       console.log(requiredWaterPercentage);
@@ -422,12 +443,9 @@ setInterval(() => {
           "&requiredWaterTemperature=" +
           requiredTemperature
       );
-   
-   
-   
     }
 
-    function stopHeating(){
+    function stopHeating() {
       // emergency stop request
       console.log("Stop heating button clicked");
       var xhttp = new XMLHttpRequest();
