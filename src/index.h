@@ -186,7 +186,10 @@ const char MAIN_page[] PROGMEM = R"=====(
       <div class="temperature-card">
         <h2>Temperature Control</h2>
         <h4>Current Temperature: <span id="temperature"> </span></h4>
-        20°C
+        °C
+        <h4 id="eta-temperature">
+          Estimated time to heat: <span id="waterheat-eta"></span>seconds
+        </h4>
         <input id="temperature-input" type="range" min="20" max="50" />
         50°C
         <h3>Heat upto: <span id="display-temperature-input"></span>°C</h3>
@@ -204,8 +207,10 @@ const char MAIN_page[] PROGMEM = R"=====(
     var prevWaterLevel = 0;
     var beingFilled = 0;
     var beingHeated = 0;
-    var   requiredWaterPercentage = 50;
-
+    var requiredWaterPercentage = 50;
+    var requiredWaterTemperature = 35;
+    var prevWaterTemperature = 0;
+    var prevTempEta  = 0;
 
     // Chart rendering
     var chartW = new Highcharts.Chart({
@@ -278,7 +283,8 @@ const char MAIN_page[] PROGMEM = R"=====(
     }, 1000); //1000mSeconds update rate
 
     function getData() {
-     
+      // get and process all data to render the website accordingly
+
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
@@ -297,37 +303,101 @@ const char MAIN_page[] PROGMEM = R"=====(
 
           console.log(this.responseText);
 
+       
+       
+         // calculate estimated time to fill water
+
+          // current Water percentage
+          let waterPercentage = parseInt(responseObj.waterPercentage);
+
+          // read the required water percentage
+          requiredWaterPercentage = parseInt(requiredWaterPercentage);
+          // calculate the difference between the current water percentage and the previous water percentage one second ago
+          let waterFillRate = waterPercentage - prevWaterLevel;
+
+          // number of seconds required to fill the water
+          let waterFillEta =
+            (requiredWaterPercentage - waterPercentage) / waterFillRate;
+
+          waterFillEta = waterFillEta.toFixed(0);
+
+          document.getElementById("waterfill-eta").innerHTML = waterFillEta;
+          prevWaterLevel = waterPercentage;
+
+          if (
+            waterFillEta > 0 &&
+            waterFillEta != Infinity &&
+            parseInt(responseObj.waterIsFilling) == 1
+          ) {
+            document.getElementById("eta-level").style.display = "block";
+          } else {
+            document.getElementById("eta-level").style.display = "none";
+          }
 
 
 
-           // calculate estimated time to fill water
-           
-           // current Water percentage
-      let waterPercentage =
-       parseInt(responseObj.waterPercentage);
+          // calculate estimated time to heat water
+
+ 
+         // calculate estimated time to fill water
+
+          // current Water temperature
+          let waterTemperature = parseFloat(responseObj.waterTemperature);
+
+          // read the required water percentage
+          requiredWaterTemperature = parseFloat(requiredWaterTemperature);
+          
+          console.log(waterTemperature);
+          console.log(requiredWaterTemperature);
+          console.log(prevWaterTemperature);
 
 
-    // read the required water percentage
-   requiredWaterPercentage = 
- parseInt( requiredWaterPercentage);
-    // calculate the difference between the current water percentage and the previous water percentage one second ago
-      let waterFillRate = waterPercentage - prevWaterLevel;
 
-      // number of seconds required to fill the water
-      let waterFillEta =
-        (requiredWaterPercentage - waterPercentage) / waterFillRate;
+          // calculate the difference between the current temp  and the previous temp, one second ago
+          let waterHeatRate = waterTemperature - prevWaterTemperature ;
 
+          // number of seconds required to heat the water
+          let waterHeatEta =
+            (requiredWaterTemperature  -  waterTemperature) / waterHeatRate;
 
-      waterFillEta = waterFillEta.toFixed(0);
+          waterHeatEta = waterHeatEta.toFixed(0);
 
-      document.getElementById("waterfill-eta").innerHTML = waterFillEta;
-      prevWaterLevel = waterPercentage;
+          console.log(waterHeatEta);
 
-      if (waterFillEta > 0 &&  waterFillEta != Infinity &&  parseInt(responseObj.waterIsFilling) == 1 ) {
-        document.getElementById("eta-level").style.display = "block";
-      } else {
-        document.getElementById("eta-level").style.display = "none";
-      }
+          
+          // update water Temperature
+          prevWaterTemperature = waterTemperature;
+        
+          if (
+            waterHeatEta > 0 &&
+           waterHeatEta != Infinity &&
+            parseInt(responseObj.waterIsHeating) == 1
+          ) {
+          document.getElementById("waterheat-eta").innerHTML = waterHeatEta;
+
+            document.getElementById("eta-temperature").style.display = "block";
+          } 
+
+          // if infinity or 0 we just show previous value however in real life we should show actual value
+          else if(
+             (waterHeatEta < 0 ||
+           waterHeatEta == Infinity) &&
+            parseInt(responseObj.waterIsHeating) == 1
+          ){
+          document.getElementById("waterheat-eta").innerHTML = prevTempEta;;
+            document.getElementById("eta-temperature").style.display = "block";
+
+          }
+          
+          else {
+            document.getElementById("eta-temperature").style.display = "none";
+          }
+
+  if(waterHeatEta > 0 && waterHeatEta != Infinity){
+
+      prevTempEta  = waterHeatEta;;
+}
+
 
 
 
@@ -368,7 +438,7 @@ const char MAIN_page[] PROGMEM = R"=====(
       let waterPercentage =
         document.getElementById("water-percentage").textContent;
 
-     requiredWaterPercentage = document.getElementById(
+      requiredWaterPercentage = document.getElementById(
         "display-water-input"
       ).textContent;
       console.log(requiredWaterPercentage);
@@ -424,6 +494,9 @@ const char MAIN_page[] PROGMEM = R"=====(
         "display-temperature-input"
       ).textContent;
       console.log(requiredTemperature);
+
+      // update global variable for tracking rate
+ requiredWaterTemperature = requiredTemperature;
 
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {

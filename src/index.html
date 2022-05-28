@@ -141,7 +141,7 @@
         width: 100%;
       }
 
-      .cahrt-water {
+      .chart-water {
         width: 100%;
         margin-top: 10vh;
         margin-bottom: 10vh;
@@ -165,8 +165,8 @@
       <div class="water-level">
         <h2>Water Level Control</h2>
         <h4>Current Level: <span id="water-percentage"> </span></h4>
-        <h4 class="eta-level" style="display: none">
-          Estimated time to fill: <span class="waterfill-eta"></span>
+        <h4 id="eta-level">
+          Estimated time to fill: <span id="waterfill-eta"></span>seconds
         </h4>
         <div style="display: flex">
           <div class="tank">
@@ -185,7 +185,10 @@
       <div class="temperature-card">
         <h2>Temperature Control</h2>
         <h4>Current Temperature: <span id="temperature"> </span></h4>
-        20°C
+        °C
+        <h4 id="eta-temperature">
+          Estimated time to heat: <span id="waterhear-eta"></span>seconds
+        </h4>
         <input id="temperature-input" type="range" min="20" max="50" />
         50°C
         <h3>Heat upto: <span id="display-temperature-input"></span>°C</h3>
@@ -201,7 +204,9 @@
 
   <script>
     var prevWaterLevel = 0;
-    var newWaterLevel = 0;
+    var beingFilled = 0;
+    var beingHeated = 0;
+    var requiredWaterPercentage = 50;
 
     // Chart rendering
     var chartW = new Highcharts.Chart({
@@ -274,29 +279,7 @@
     }, 1000); //1000mSeconds update rate
 
     function getData() {
-      // calculate estimated time to fill water
-      let waterPercentage =
-        document.getElementById("water-percentage").textContent;
-
-      let requiredWaterPercentage = document.getElementById(
-        "display-water-input"
-      ).textContent;
-
-      let waterFillRate = waterPercentage - prevWaterLevel;
-
-      let waterFillEta =
-        (requiredWaterPercentage - waterPercentage) / waterFillRate;
-
-      waterFillEta = waterFillEta.toFixed(2);
-
-      document.getElementById("waterfill-eta").innerHTML = waterFillEta;
-      prevWaterLevel = waterPercentage;
-
-      if (waterFillEta > 0 && waterFillEta != Infinity) {
-        document.getElementById("eta-level").style.display = "block";
-      } else {
-        document.getElementById("eta-level").style.display = "none";
-      }
+      // get and process all data to render the website accordingly
 
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
@@ -315,6 +298,35 @@
           console.log(responseObj.waterTemperature);
 
           console.log(this.responseText);
+
+          // calculate estimated time to fill water
+
+          // current Water percentage
+          let waterPercentage = parseInt(responseObj.waterPercentage);
+
+          // read the required water percentage
+          requiredWaterPercentage = parseInt(requiredWaterPercentage);
+          // calculate the difference between the current water percentage and the previous water percentage one second ago
+          let waterFillRate = waterPercentage - prevWaterLevel;
+
+          // number of seconds required to fill the water
+          let waterFillEta =
+            (requiredWaterPercentage - waterPercentage) / waterFillRate;
+
+          waterFillEta = waterFillEta.toFixed(0);
+
+          document.getElementById("waterfill-eta").innerHTML = waterFillEta;
+          prevWaterLevel = waterPercentage;
+
+          if (
+            waterFillEta > 0 &&
+            waterFillEta != Infinity &&
+            parseInt(responseObj.waterIsFilling) == 1
+          ) {
+            document.getElementById("eta-level").style.display = "block";
+          } else {
+            document.getElementById("eta-level").style.display = "none";
+          }
         }
       };
       xhttp.open("GET", "readData", true);
@@ -350,7 +362,7 @@
       let waterPercentage =
         document.getElementById("water-percentage").textContent;
 
-      let requiredWaterPercentage = document.getElementById(
+      requiredWaterPercentage = document.getElementById(
         "display-water-input"
       ).textContent;
       console.log(requiredWaterPercentage);
