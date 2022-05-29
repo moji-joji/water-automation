@@ -45,7 +45,7 @@ void handleData()
     float waterDistance = Waterlevel::getWaterLevel();
 
     // as the sensor is 2.75cm away from the max water level, we need to subtract 2.75 from the distance
-    waterDistance = waterDistance - 2.75;
+    waterDistance = waterDistance - 3.30;
 
     // total height of container is 8cm, so we find percentage according to it
     int waterPercentage = 100 - ((waterDistance) / 8) * 100;
