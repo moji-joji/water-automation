@@ -155,7 +155,6 @@ table, th, td {
         margin-bottom: 10vh;
       }
     </style>
-    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="container">
