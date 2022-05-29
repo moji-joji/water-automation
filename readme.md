@@ -55,6 +55,7 @@ D[Temperature sensor] --Data--> B
 A[Webpage] -- Request --> B
 B --Response-->A
 E[User]--Interacts-->A
+```
 
 ## Images
 
