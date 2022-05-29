@@ -1,4 +1,5 @@
 const char MAIN_page[] PROGMEM = R"=====(
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -76,7 +77,13 @@ const char MAIN_page[] PROGMEM = R"=====(
       .btn-red:active {
         box-shadow: none;
       }
-
+table{
+  border-collapse: collapse;
+}
+table, th, td {
+  border: 1px solid black;
+  padding: 5px;
+}
       .tank {
         width: 150px;
         height: 300px;
@@ -195,7 +202,9 @@ const char MAIN_page[] PROGMEM = R"=====(
 
         <h3>
           Schedule:
-          <table class="schedule-table"></table>
+          <table class="schedule-table">
+       
+          </table>
           <button class="btn-red" onclick="deleteFromWaterSchedule()">
             Delete last added
           </button>
@@ -205,7 +214,7 @@ const char MAIN_page[] PROGMEM = R"=====(
       <div class="temperature-card">
         <h2>Temperature Control</h2>
         <h4>Current Temperature: <span id="temperature"> </span></h4>
-        °C
+
         <h4 id="eta-temperature">
           Estimated time to heat: <span id="waterheat-eta"></span>seconds
         </h4>
@@ -214,6 +223,28 @@ const char MAIN_page[] PROGMEM = R"=====(
         <h3>Heat upto: <span id="display-temperature-input"></span>°C</h3>
         <button class="btn" onclick="heatWater()">Heat water</button>
         <button class="btn-red" onclick="stopHeating()">Stop heating</button>
+
+        <div class="schedule-heating" style="margin: 40px 0px 40px 0px">
+          <input
+            type="datetime-local"
+            name="scheduled-time-heat"
+            id="scheduled-time-heat"
+          />
+          <button class="btn" onclick="scheduleHeating()">
+            Schedule Heating
+          </button>
+
+          <h3>
+            Schedule:
+            <table class="schedule-table-heat">
+           
+            
+            </table>
+            <button class="btn-red" onclick="deleteFromHeatSchedule()">
+              Delete last added
+            </button>
+          </h3>
+        </div>
       </div>
 
       <div id="chart-water" class="container"></div>
@@ -539,18 +570,36 @@ const char MAIN_page[] PROGMEM = R"=====(
       console.log("Heating stopped request sent");
     }
 
-    // global array
-    var scheduleJson = [];
-    var timeoutArr = [];
+    // global arrays for scheduling
+    var scheduleFillingJson = [];
+    var timeoutFillingArr = [];
+    var scheduleHeatingJson = [];
+    var timeoutHeatingArr = [];
 
     function printWaterFillingSchedule() {
-      for (let i = 0; i < scheduleJson.length; i++) {
+        document.getElementsByClassName("schedule-table")[0].innerHTML += "<tr>  <th> Time </th><th> Water Percentage </th> </tr>";
+      for (let i = 0; i < scheduleFillingJson.length; i++) {
+
         document.getElementsByClassName("schedule-table")[0].innerHTML +=
           "<tr><td>" +
-          scheduleJson[i].time +
+          scheduleFillingJson[i].time +
           "</td><td>" +
-          scheduleJson[i].waterLevel +
-          "</td></tr>";
+          scheduleFillingJson[i].waterLevel +
+          "%</td></tr>";
+      }
+    }
+
+    function printWaterHeatingSchedule() {
+     document.getElementsByClassName("schedule-table-heat")[0].innerHTML += "<tr> <th> Time </th><th> Water Temperature </th></tr>";
+      for (let i = 0; i < scheduleHeatingJson.length; i++) {
+
+
+        document.getElementsByClassName("schedule-table-heat")[0].innerHTML +=
+          "<tr><td>" +
+          scheduleHeatingJson[i].time +
+          "</td><td>" +
+          scheduleHeatingJson[i].waterTemperature +
+          "°C</td></tr>";
       }
     }
 
@@ -566,7 +615,7 @@ const char MAIN_page[] PROGMEM = R"=====(
 
       let waterLevel = document.getElementById("water-percentage").textContent;
 
-      timeoutArr.push(
+      timeoutFillingArr.push(
         setTimeout(() => {
           console.log("Scheduled filling request sent");
           // send request to fill water
@@ -591,13 +640,13 @@ const char MAIN_page[] PROGMEM = R"=====(
 
           console.log(new Date());
 
-          scheduleJson.shift();
-          timeoutArr.shift();
+          scheduleFillingJson.shift();
+          timeoutFillingArr.shift();
         }, new Date(time).getTime() - new Date().getTime())
       );
 
       // add the request to the schedule
-      scheduleJson.push({
+      scheduleFillingJson.push({
         time: time,
         waterLevel: requiredWaterPercentage,
       });
@@ -606,20 +655,87 @@ const char MAIN_page[] PROGMEM = R"=====(
       printWaterFillingSchedule();
     }
 
-    function deleteFromWaterSchedule() {
-      scheduleJson.pop();
-      clearTimeout(timeoutArr.pop());
+    // schedule heating water
+    function scheduleHeating() {
+      // get the time from the input
+      let time = document.getElementById("scheduled-time-heat").value;
+      console.log(time);
+
+      // get the water temp from the input
+      let requiredWaterTemperature =
+        document.getElementById("temperature-input").value;
+
+      let waterTemperature = document.getElementById("temperature").textContent;
+
+      timeoutHeatingArr.push(
+        setTimeout(() => {
+          console.log("Scheduled heating request sent");
+          // send request to fill water
+          var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              console.log(this.responseText);
+            }
+          };
+          xhttp.open("POST", "heatWater", true);
+          xhttp.setRequestHeader(
+            "Content-type",
+            "application/x-www-form-urlencoded"
+          );
+
+          xhttp.send(
+            "waterTemperature=" +
+              waterTemperature +
+              "&requiredWaterTemperature=" +
+              requiredWaterTemperature
+          );
+
+          console.log(new Date());
+
+          scheduleHeatingJson.shift();
+          timeoutHeatingArr.shift();
+        }, new Date(time).getTime() - new Date().getTime())
+      );
+
+    // add the request to the schedule
+      scheduleHeatingJson.push({
+        time: time,
+        waterTemperature: requiredWaterTemperature,
+      });
+      document.getElementsByClassName("schedule-table")[0].innerHTML = "";
+
+      printWaterFillingSchedule();
     }
+
+    // delete and remove timeout from schedule
+    function deleteFromWaterSchedule() {
+      scheduleFillingJson.pop();
+      clearTimeout(timeoutFillingArr.pop());
+    }
+
+    function deleteFromHeatSchedule() {
+      scheduleHeatingJson.pop();
+      clearTimeout(timeoutHeatingArr.pop());
+    }
+
+    // print the schedule after one second update
+
     setInterval(() => {
       // print schedule
       document.getElementsByClassName("schedule-table")[0].innerHTML = "";
       printWaterFillingSchedule();
 
-      console.log(scheduleJson);
+      // print heating schedule
+      document.getElementsByClassName("schedule-table-heat")[0].innerHTML = "";
+      printWaterHeatingSchedule();
 
-      console.log(timeoutArr);
+      console.log(scheduleFillingJson);
+      console.log(timeoutFillingArr);
+      console.log(scheduleHeatingJson);
+      console.log(timeoutHeatingArr);
     }, 1000);
   </script>
 </html>
+
 
 )=====";
