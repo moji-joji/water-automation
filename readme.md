@@ -61,10 +61,12 @@ E[User]--Interacts-->A
 
 
 ### Breadboard
-![]()
+![](breadboard.jpeg)
+![](breadboard1.jpeg)
+
 
 ### Container
-![]()
+![](container.jpeg)
 
 
 ### Water Filling Controls
@@ -73,6 +75,6 @@ E[User]--Interacts-->A
 ### Water Heating Controls
 ![](waterheat.jpg)
 
-###Graphs
+### Graphs
 ![](graphs.jpg)
 
