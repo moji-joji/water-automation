@@ -23,6 +23,15 @@ Total Cost =  PKR 1700
 ## Interface
 The user interface is implemented through a web server which is acessible through the localhost. The ESP 32 connects to the wifi using SSID and password predefined in a secret file. The user connects to the same wifi network to access the webpage.
 
+## Features
+- Fill water to a certain percentage
+- Heat water to a certain temperature
+- Visual indication of water level
+- Visual indication of water temperature
+- Temperature and water level readings in real time
+- Temperature and water level graphs
+- Scheduling of water filling and heating
+
 ## Status Leds
 Onboard LEDs are present to reflect status.
 |                |LED                          |State                         |
