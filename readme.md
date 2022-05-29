@@ -9,6 +9,9 @@ Water automation system  has two use cases
 
 The system is controlled using the webpage which is served by the ESP 32 webserver.
 
+## Animation
+![](waterfill.gif)
+
 ## Parts Used
 Total Cost =  PKR 1700
 - ESP 32 
