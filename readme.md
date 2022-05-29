@@ -55,3 +55,23 @@ D[Temperature sensor] --Data--> B
 A[Webpage] -- Request --> B
 B --Response-->A
 E[User]--Interacts-->A
+
+## Images
+
+
+### Breadboard
+![]()
+
+### Container
+![]()
+
+
+### Water Filling Controls
+
+![](waterfill.jpg)
+### Water Heating Controls
+![](waterheat.jpg)
+
+###Graphs
+![](graphs.jpg)
+
