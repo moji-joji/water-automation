@@ -180,6 +180,7 @@ const char MAIN_page[] PROGMEM = R"=====(
         class="water-level text-primary bg-opacity-10 bg-black border-secondary border-3 p-5 shadow rounded d-flex flex-column align-items-center"
       >
         <h3 class="bg-light p-3 rounded shadow">Water Level Control</h3>
+        <h4 class="text-dark">Status: <span id="filling-status">OFF</span></h4>
         <h4>Current Level: <span id="water-percentage"> </span></h4>
         <h4 id="eta-level">
           Estimated time to fill:
@@ -202,7 +203,10 @@ const char MAIN_page[] PROGMEM = R"=====(
           Stop Filling Water
         </button>
 
-        <div class="schedule-filling my-5" style="margin: 40px 0px 40px 0px">
+        <div
+          class="schedule-filling my-5 d-flex flex-column"
+          style="margin: 40px 0px 40px 0px"
+        >
           <input
             type="datetime-local"
             name="scheduled-time"
@@ -211,7 +215,10 @@ const char MAIN_page[] PROGMEM = R"=====(
             value="2022-05-29T00:00"
           />
 
-          <button class="btn btn-light my-2" onclick="scheduleFilling()">
+          <button
+            class="btn btn-light my-2 align-self-center"
+            onclick="scheduleFilling()"
+          >
             Schedule Filling
           </button>
           <div class="d-flex flex-column align-items-center">
@@ -233,6 +240,7 @@ const char MAIN_page[] PROGMEM = R"=====(
         class="temperature-card water-level text-primary bg-opacity-10 bg-black border-secondary border-3 p-5 shadow rounded d-flex flex-column align-items-center"
       >
         <h2 class="bg-light p-3 rounded shadow">Temperature Control</h2>
+        <h4 class="text-dark">Status: <span id="heating-status">OFF</span></h4>
         <h4>Current Temperature: <span id="temperature"> </span></h4>
 
         <h4 id="eta-temperature">
@@ -250,7 +258,10 @@ const char MAIN_page[] PROGMEM = R"=====(
           Stop heating
         </button>
 
-        <div class="schedule-heating my-5" style="margin: 40px 0px 40px 0px">
+        <div
+          class="schedule-heating my-5 d-flex flex-column"
+          style="margin: 40px 0px 40px 0px"
+        >
           <input
             type="datetime-local"
             name="scheduled-time-heat"
@@ -258,7 +269,10 @@ const char MAIN_page[] PROGMEM = R"=====(
             value="2022-05-29T00:00"
             class="mx-3"
           />
-          <button class="btn btn-light" onclick="scheduleHeating()">
+          <button
+            class="btn btn-light my-3 align-self-center"
+            onclick="scheduleHeating()"
+          >
             Schedule Heating
           </button>
           <div class="d-flex flex-column align-items-center my-5 text-center">
@@ -469,6 +483,21 @@ const char MAIN_page[] PROGMEM = R"=====(
 
           if (waterHeatEta > 0 && waterHeatEta != Infinity) {
             prevTempEta = waterHeatEta;
+          }
+
+          // update status
+          if (parseInt(responseObj.waterIsFilling) == 1) {
+            document.getElementById("filling-status").innerHTML =
+              "<span class='text-success'>Filling</span>";
+          } else {
+            document.getElementById("filling-status").innerHTML = "Idle";
+          }
+
+          if (parseInt(responseObj.waterIsHeating) == 1) {
+            document.getElementById("heating-status").innerHTML =
+              "<span class='text-success'>Heating</span>";
+          } else {
+            document.getElementById("heating-status").innerHTML = "Idle";
           }
         }
       };
@@ -770,6 +799,5 @@ const char MAIN_page[] PROGMEM = R"=====(
     }, 1000);
   </script>
 </html>
-
 
 )=====";
