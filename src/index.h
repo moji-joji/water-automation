@@ -8,13 +8,18 @@ const char MAIN_page[] PROGMEM = R"=====(
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <title>Water Automation</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
     <style>
       * {
         margin: 0%;
         padding: 0%;
         box-sizing: border-box;
-        font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-          "Lucida Sans", Arial, sans-serif;
+        font-family: "Roboto", sans-serif;
       }
 
       .container {
@@ -77,13 +82,15 @@ const char MAIN_page[] PROGMEM = R"=====(
       .btn-red:active {
         box-shadow: none;
       }
-table{
-  border-collapse: collapse;
-}
-table, th, td {
-  border: 1px solid black;
-  padding: 5px;
-}
+      table {
+        border-collapse: collapse;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid black;
+        padding: 5px;
+      }
       .tank {
         width: 150px;
         height: 300px;
@@ -100,7 +107,7 @@ table, th, td {
         background: blue;
         width: 100%;
         bottom: 0;
-        border-radius: 10px;
+        border-radius: 10px 10px 0px 0px;
       }
 
       .temperature-card {
@@ -169,86 +176,115 @@ table, th, td {
           Automation
         </h1>
       </div>
-      <div class="water-level">
-        <h2>Water Level Control</h2>
+      <div
+        class="water-level text-primary bg-opacity-10 bg-black border-secondary border-3 p-5 shadow rounded d-flex flex-column align-items-center"
+      >
+        <h3 class="bg-light p-3 rounded shadow">Water Level Control</h3>
         <h4>Current Level: <span id="water-percentage"> </span></h4>
         <h4 id="eta-level">
-          Estimated time to fill: <span id="waterfill-eta"></span>seconds
+          Estimated time to fill:
+          <span id="waterfill-eta" class="mx-3"></span>seconds
         </h4>
-        <div style="display: flex">
-          <div class="tank">
-            <div class="water" id="blue-water" style="height: 0%"></div>
+        <div style="display: flex" class="">
+          <div class="tank mx-5">
+            <div class="water" id="blue-water" style="height: 30%"></div>
           </div>
           <input id="water-input" type="range" orient="vertical" />
-          <span id="display-water-input">50</span
-          ><span id="display-water-input">%</span>
+          <span id="display-water-input" class="text-primary bold">50</span
+          ><span id="display-water-input" class="text-primary">%</span>
+        </div>
+
+        <button class="btn my-2 mx-3 btn-light" onclick="fillWater()">
+          Fill Water
+        </button>
+
+        <button class="btn btn-red btn-light" onclick="stopWater()">
+          Stop Filling Water
+        </button>
+
+        <div class="schedule-filling my-5" style="margin: 40px 0px 40px 0px">
+          <input
+            type="datetime-local"
+            name="scheduled-time"
+            id="scheduled-time"
+            class="mx-3 my-2 border-secondary"
+            value="2022-05-29T00:00"
+          />
+
+          <button class="btn btn-light my-2" onclick="scheduleFilling()">
+            Schedule Filling
+          </button>
+          <div class="d-flex flex-column align-items-center">
+            <h3 class="my-3 text-center">
+              Schedule:
+              <table class="schedule-table my-2 rounded"></table>
+            </h3>
+            <button
+              class="btn btn-red my-2 btn-light w-50 h-50"
+              onclick="deleteFromWaterSchedule()"
+            >
+              Delete last added
+            </button>
+          </div>
         </div>
       </div>
 
-      <button class="btn" onclick="fillWater()">Fill Water</button>
-
-      <button class="btn-red" onclick="stopWater()">Stop Filling Water</button>
-
-      <div class="schedule-filling" style="margin: 40px 0px 40px 0px">
-        <input
-          type="datetime-local"
-          name="scheduled-time"
-          id="scheduled-time"
-        />
-        <button class="btn" onclick="scheduleFilling()">
-          Schedule Filling
-        </button>
-
-        <h3>
-          Schedule:
-          <table class="schedule-table">
-       
-          </table>
-          <button class="btn-red" onclick="deleteFromWaterSchedule()">
-            Delete last added
-          </button>
-        </h3>
-      </div>
-
-      <div class="temperature-card">
-        <h2>Temperature Control</h2>
+      <div
+        class="temperature-card water-level text-primary bg-opacity-10 bg-black border-secondary border-3 p-5 shadow rounded d-flex flex-column align-items-center"
+      >
+        <h2 class="bg-light p-3 rounded shadow">Temperature Control</h2>
         <h4>Current Temperature: <span id="temperature"> </span></h4>
 
         <h4 id="eta-temperature">
           Estimated time to heat: <span id="waterheat-eta"></span>seconds
         </h4>
-        <input id="temperature-input" type="range" min="20" max="50" />
-        50°C
-        <h3>Heat upto: <span id="display-temperature-input"></span>°C</h3>
-        <button class="btn" onclick="heatWater()">Heat water</button>
-        <button class="btn-red" onclick="stopHeating()">Stop heating</button>
+        <span>
+          20°C
+          <input id="temperature-input" type="range" min="20" max="50" />
+          50°C
+        </span>
 
-        <div class="schedule-heating" style="margin: 40px 0px 40px 0px">
+        <h3>Heat upto: <span id="display-temperature-input"></span>°C</h3>
+        <button class="btn btn-light" onclick="heatWater()">Heat water</button>
+        <button class="btn btn-red btn-light" onclick="stopHeating()">
+          Stop heating
+        </button>
+
+        <div class="schedule-heating my-5" style="margin: 40px 0px 40px 0px">
           <input
             type="datetime-local"
             name="scheduled-time-heat"
             id="scheduled-time-heat"
+            value="2022-05-29T00:00"
+            class="mx-3"
           />
-          <button class="btn" onclick="scheduleHeating()">
+          <button class="btn btn-light" onclick="scheduleHeating()">
             Schedule Heating
           </button>
-
-          <h3>
-            Schedule:
-            <table class="schedule-table-heat">
-           
-            
-            </table>
-            <button class="btn-red" onclick="deleteFromHeatSchedule()">
+          <div class="d-flex flex-column align-items-center my-5 text-center">
+            <h3 class="my-3">
+              <div class="my-3">Schedule:</div>
+              <table class="schedule-table-heat"></table>
+            </h3>
+            <button
+              class="btn btn-red btn-light x"
+              onclick="deleteFromHeatSchedule()"
+            >
               Delete last added
             </button>
-          </h3>
+          </div>
         </div>
       </div>
 
-      <div id="chart-water" class="container"></div>
+      <div
+        id="chart-water"
+        class="container rounded shadow my-5 bg-primary bg-opacity-10"
+      ></div>
 
-      <div id="chart-temperature" class="container"></div>
+      <div
+        id="chart-temperature"
+        class="container rounded shadow my-5 bg-primary bg-opacity-10"
+      ></div>
     </div>
   </body>
 
@@ -576,9 +612,9 @@ table, th, td {
     var timeoutHeatingArr = [];
 
     function printWaterFillingSchedule() {
-        document.getElementsByClassName("schedule-table")[0].innerHTML += "<tr>  <th> Time </th><th> Water Percentage </th> </tr>";
+      document.getElementsByClassName("schedule-table")[0].innerHTML +=
+        "<tr>  <th> Time </th><th> Water Percentage </th> </tr>";
       for (let i = 0; i < scheduleFillingJson.length; i++) {
-
         document.getElementsByClassName("schedule-table")[0].innerHTML +=
           "<tr><td>" +
           scheduleFillingJson[i].time +
@@ -589,10 +625,9 @@ table, th, td {
     }
 
     function printWaterHeatingSchedule() {
-     document.getElementsByClassName("schedule-table-heat")[0].innerHTML += "<tr> <th> Time </th><th> Water Temperature </th></tr>";
+      document.getElementsByClassName("schedule-table-heat")[0].innerHTML +=
+        "<tr> <th> Time </th><th> Water Temperature </th></tr>";
       for (let i = 0; i < scheduleHeatingJson.length; i++) {
-
-
         document.getElementsByClassName("schedule-table-heat")[0].innerHTML +=
           "<tr><td>" +
           scheduleHeatingJson[i].time +
@@ -696,7 +731,7 @@ table, th, td {
         }, new Date(time).getTime() - new Date().getTime())
       );
 
-    // add the request to the schedule
+      // add the request to the schedule
       scheduleHeatingJson.push({
         time: time,
         waterTemperature: requiredWaterTemperature,
