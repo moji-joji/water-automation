@@ -9,6 +9,8 @@ Water automation system  has two use cases
 
 The system is controlled using the webpage which is served by the ESP 32 webserver.
 
+#### Note: The wifi and password details are stored in a namespace in secrets.hpp file in the root directory. This file is private hence in the .gitignore file. If you want to run the project, make this file according to your wifi and password first. 
+
 ## Animation
 ![](waterfill.gif)
 
